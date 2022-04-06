@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,7 +10,20 @@ import (
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new movie")
+	var input struct {
+		Title   string   `json:"title"`
+		Year    int32    `json:"year"`
+		Runtime int32    `json:"runtime"`
+		Genres  []string `json:"genres"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,3 +47,27 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+//json.Unmarshal() requires about 80% more memory (B/op) than json.Decoder, as well as
+//being a tiny bit slower (ns/op).
+// example usage for json.Unmarshal instead of decode
+// func (app *application) exampleHandler(w(w http.ResponseWriter, r *http.Request) {
+// 	var input struct {
+// 	Foo string `json:"foo"`
+// 	}
+// 	// Use io.ReadAll() to read the entire request body into a []byte slice.
+// 	body, err := io.ReadAll(r.Body)
+// 	if err != nil {
+// 	app.serverErrorResponse(w, r, err)
+// 	return
+// 	}
+// 	// Use the json.Unmarshal() function to decode the JSON in the []byte slice to the
+// 	// input struct. Again, notice that we are using a *pointer* to the input
+// 	// struct as the decode destination.
+// 	err = json.Unmarshal(body, &input)
+// 	if err != nil {
+// 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+// 	return
+// 	}
+// 	fmt.Fprintf(w, "%+v\n", input)
+// 	}
