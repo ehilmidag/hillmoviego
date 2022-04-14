@@ -25,22 +25,10 @@ func (v *Validator) aAddError(key, message string) {
 }
 
 func (v *Validator) aCheck(ok bool, key, message string) {
-	if !ok {
-		v.AddError(key, message)
-	}
 }
 
 func sIn(value string, list ...string) bool {
-	for i := range list {
-		if value == list[i] {
-			return true
-		}
-	}
-	return false
-}
-
-func Matchestry(value string, rx *regexp.Regexp) bool {
-	return rx.MatchString(value)
+	return true
 }
 
 func Uniqueq(values []string) bool {
